@@ -1,0 +1,64 @@
+name: Deploy to AKS - Production
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: your-resource-group
+  AZURE_AKS_CLUSTER: your-aks-cluster
+  NAMESPACE: production
+  HELM_RELEASE: langgraph-app-production
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Set AKS context
+      uses: azure/aks-set-context@v3
+      with:
+        resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+        cluster-name: ${{ env.AZURE_AKS_CLUSTER }}
+        
+    - name: Create namespace if not exists
+      run: |
+        kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+        
+    - name: Create secrets from Key Vault
+      run: |
+        # Example: Fetch secrets from Azure Key Vault
+        # az keyvault secret show --name openai-api-key --vault-name ${{ secrets.KEYVAULT_NAME }} --query value -o tsv | \
+        # kubectl create secret generic langgraph-secrets --from-literal=openai-api-key=$(cat) -n ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+        echo "Secrets should be created from Azure Key Vault or GitHub Secrets"
+        
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install ${{ env.HELM_RELEASE }} ./helm/langgraph-app \
+          --namespace ${{ env.NAMESPACE }} \
+          --set image.tag=${{ github.ref_name }} \
+          --set ingress.hosts[0].host=langgraph-app.example.com \
+          --set replicaCount=3 \
+          --wait \
+          --timeout 10m
+          
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/${{ env.HELM_RELEASE }} -n ${{ env.NAMESPACE }}
+        kubectl get pods -n ${{ env.NAMESPACE }}
+        
+    - name: Run smoke tests
+      run: |
+        # Add smoke tests here
+        echo "Running smoke tests..."

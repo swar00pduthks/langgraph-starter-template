@@ -1,0 +1,66 @@
+name: CI - Lint and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Cache uv dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/uv
+          .venv
+        key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-uv-
+          
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv pip install -r pyproject.toml
+        uv pip install -e ".[dev]"
+        
+    - name: Run Ruff linter
+      run: |
+        uv run ruff check app/
+        
+    - name: Run Black formatter check
+      run: |
+        uv run black --check app/
+        
+    - name: Run type checking with mypy
+      run: |
+        uv run mypy app/
+      continue-on-error: true
+        
+    - name: Run tests with pytest
+      run: |
+        uv run pytest tests/ -v --cov=app --cov-report=xml --cov-report=term
+      continue-on-error: true
+        
+    - name: Upload coverage to artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage.xml
+      if: always()

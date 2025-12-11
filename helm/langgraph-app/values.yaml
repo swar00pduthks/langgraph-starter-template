@@ -1,0 +1,136 @@
+# Default values for langgraph-app
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: your-registry.azurecr.io/langgraph-app
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "langgraph-app-sa"
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: langgraph-app.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: langgraph-app-tls
+      hosts:
+        - langgraph-app.example.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+livenessProbe:
+  httpGet:
+    path: /live
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - langgraph-app
+          topologyKey: kubernetes.io/hostname
+
+env:
+  - name: DEBUG
+    value: "false"
+  - name: A2A_ENABLED
+    value: "true"
+  - name: MCP_ENABLED
+    value: "false"
+  - name: ENABLE_MONITORING
+    value: "true"
+
+# Secret references (use Azure Key Vault or Kubernetes secrets)
+secrets:
+  - name: OPENAI_API_KEY
+    secretName: langgraph-secrets
+    secretKey: openai-api-key
+  - name: A2A_SECRET_KEY
+    secretName: langgraph-secrets
+    secretKey: a2a-secret-key
+  - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+    secretName: langgraph-secrets
+    secretKey: appinsights-connection-string
+
+# Azure Monitor integration
+azureMonitor:
+  enabled: true
+  workspaceId: ""
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
