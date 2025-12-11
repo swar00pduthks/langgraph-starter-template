@@ -1,0 +1,15 @@
+apiVersion: v2
+name: langgraph-app
+description: A Helm chart for LangGraph Starter Template
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - langgraph
+  - langchain
+  - fastapi
+  - ai
+  - agents
+maintainers:
+  - name: Your Name
+    email: you@example.com

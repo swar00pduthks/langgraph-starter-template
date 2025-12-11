@@ -1,0 +1,200 @@
+LangGraph Starter Template - Project Structure
+===============================================
+
+📦 langgraph-starter-template/
+│
+├── 📄 README.md                          # Main documentation
+├── 📄 IMPLEMENTATION_SUMMARY.md          # Implementation details
+├── 📄 pyproject.toml                     # uv dependencies & config
+├── 📄 uv.lock                            # Locked dependencies
+├── 📄 .gitignore                         # Git ignore rules
+├── 📄 .dockerignore                      # Docker ignore rules
+├── 📄 .env.example                       # Environment variables template
+├── 📄 .pre-commit-config.yaml            # Pre-commit hooks config
+├── 📄 Dockerfile                         # Multi-stage production image
+├── 📄 docker-compose.yml                 # Local development setup
+│
+├── 📁 app/                               # Main application code
+│   ├── 📄 __init__.py
+│   ├── 📄 main.py                        # FastAPI application entry
+│   │
+│   ├── 📁 api/                           # API endpoints
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 health.py                  # Health check endpoints
+│   │   ├── 📄 agent.py                   # Agent chat endpoints
+│   │   ├── 📄 copilot.py                 # CopilotKit endpoints
+│   │   └── 📄 a2a.py                     # A2A protocol endpoints
+│   │
+│   ├── 📁 agents/                        # LangGraph agents
+│   │   ├── 📄 __init__.py
+│   │   └── 📄 demo_agent.py              # Demo agent implementation
+│   │
+│   ├── 📁 core/                          # Core configuration
+│   │   ├── 📄 __init__.py
+│   │   └── 📄 config.py                  # Settings & environment
+│   │
+│   ├── 📁 schemas/                       # Pydantic models
+│   │   └── 📄 __init__.py                # Request/response schemas
+│   │
+│   └── 📁 services/                      # Business logic
+│       ├── 📄 __init__.py
+│       ├── 📄 a2a_protocol.py            # A2A implementation
+│       └── 📄 copilot_service.py         # CopilotKit service
+│
+├── 📁 tests/                             # Test suite
+│   ├── 📄 conftest.py                    # Test configuration
+│   ├── 📄 test_health.py                 # Health endpoint tests
+│   ├── 📄 test_agent.py                  # Agent tests
+│   └── 📄 test_a2a.py                    # A2A protocol tests
+│
+├── 📁 docs/                              # Documentation
+│   ├── 📄 getting-started.md             # Quick start guide
+│   ├── 📄 architecture.md                # System architecture
+│   ├── 📄 api-documentation.md           # API reference
+│   ├── 📄 aks-deployment.md              # Azure deployment guide
+│   └── 📄 azure-integration.md           # Azure services guide
+│
+├── 📁 helm/                              # Kubernetes Helm charts
+│   └── 📁 langgraph-app/
+│       ├── 📄 Chart.yaml                 # Chart metadata
+│       ├── 📄 values.yaml                # Default values
+│       │
+│       └── 📁 templates/                 # Kubernetes manifests
+│           ├── 📄 _helpers.tpl           # Template helpers
+│           ├── 📄 deployment.yaml        # Deployment manifest
+│           ├── 📄 service.yaml           # Service manifest
+│           ├── 📄 ingress.yaml           # Ingress manifest
+│           ├── 📄 hpa.yaml               # Horizontal Pod Autoscaler
+│           ├── 📄 pdb.yaml               # Pod Disruption Budget
+│           └── 📄 serviceaccount.yaml    # Service Account
+│
+└── 📁 .github/                           # GitHub Actions
+    └── 📁 workflows/
+        ├── 📄 ci.yml                     # Lint & test workflow
+        ├── 📄 docker.yml                 # Docker build workflow
+        ├── 📄 deploy-staging.yml         # Staging deployment
+        └── 📄 deploy-production.yml      # Production deployment
+
+
+Key Features by Directory
+==========================
+
+📁 app/
+  ✅ FastAPI async application
+  ✅ LangChain/LangGraph integration
+  ✅ CopilotKit AGUI support
+  ✅ A2A secure protocol
+  ✅ Modular architecture
+
+📁 tests/
+  ✅ Pytest with async support
+  ✅ Coverage reporting
+  ✅ Mocking support
+  ✅ Unit tests for all endpoints
+
+📁 docs/
+  ✅ Complete guides
+  ✅ Architecture diagrams
+  ✅ API documentation
+  ✅ Deployment instructions
+  ✅ Azure integration guide
+
+📁 helm/
+  ✅ Production-ready charts
+  ✅ Auto-scaling (HPA)
+  ✅ High availability (PDB)
+  ✅ Ingress with TLS
+  ✅ RBAC configuration
+
+📁 .github/workflows/
+  ✅ Automated CI/CD
+  ✅ Code quality checks
+  ✅ Docker builds
+  ✅ AKS deployments
+  ✅ Staging & production
+
+
+Technology Stack
+================
+
+Language & Framework:
+  • Python 3.11+
+  • FastAPI (async)
+  • Pydantic (validation)
+
+AI/ML:
+  • LangChain
+  • LangGraph
+  • OpenAI API
+
+Package Management:
+  • uv (fast installer)
+  • pyproject.toml
+
+Infrastructure:
+  • Docker (multi-stage)
+  • Kubernetes (AKS)
+  • Helm (package manager)
+  • NGINX Ingress
+
+Azure Services:
+  • AKS (orchestration)
+  • ACR (registry)
+  • Key Vault (secrets)
+  • Monitor (logging)
+  • App Insights (APM)
+
+Development Tools:
+  • Ruff (linting)
+  • Black (formatting)
+  • MyPy (type checking)
+  • Pytest (testing)
+  • Pre-commit (hooks)
+
+
+Quick Commands
+==============
+
+Setup:
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  uv venv && source .venv/bin/activate
+  uv pip install -r pyproject.toml
+
+Development:
+  uvicorn app.main:app --reload
+  uv run pytest --cov=app
+  uv run ruff check app/
+
+Docker:
+  docker-compose up --build
+  docker build -t langgraph-app .
+
+Deployment:
+  helm upgrade --install langgraph-app ./helm/langgraph-app
+
+
+API Endpoints Summary
+=====================
+
+Health & Status:
+  GET  /health                        # Health check
+  GET  /ready                         # Readiness probe
+  GET  /live                          # Liveness probe
+
+Agent:
+  POST /api/v1/agent/chat            # Chat with agent
+  GET  /api/v1/agent/status          # Agent status
+
+CopilotKit:
+  POST /api/v1/copilot/chat          # Standard chat
+  POST /api/v1/copilot/chat/stream   # Streaming chat
+
+A2A Protocol:
+  POST /api/v1/a2a/send              # Send A2A message
+  POST /api/v1/a2a/receive           # Receive A2A message
+  GET  /api/v1/a2a/status            # Protocol status
+
+
+Interactive Docs:
+  http://localhost:8000/docs          # Swagger UI
+  http://localhost:8000/redoc         # ReDoc
